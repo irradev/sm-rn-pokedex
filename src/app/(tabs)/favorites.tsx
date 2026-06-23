@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 
-export default function Index() {
+export default function FavoritesScreen() {
   return (
     <View style={styles.container}>
-      <Text>Hello world</Text>
+      <Text>Favorites</Text>
     </View>
   );
 }
