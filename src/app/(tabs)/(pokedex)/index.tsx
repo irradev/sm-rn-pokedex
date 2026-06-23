@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { fetchPokemonList } from "@/lib/pokeapi";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, Button, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const LIMIT = 30;
@@ -77,7 +77,7 @@ export default function PokedexScreen() {
             onPress={() => router.push(`/(tabs)/(pokedex)/${id}`)}
           >
             <Image source={{ uri: spriteUrl }} style={{ width: 50, height: 50 }} />
-            <Text style={styles.itemText}>{item.name}</Text>
+            <Text style={styles.itemText}>#{id} - {item.name}</Text>
           </TouchableOpacity>
         );
       }}
