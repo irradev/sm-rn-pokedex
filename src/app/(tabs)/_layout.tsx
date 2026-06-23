@@ -1,3 +1,4 @@
+import { Ionicons } from '@react-native-vector-icons/ionicons';
 import { Tabs } from "expo-router";
 
 export default function RootLayout() {
@@ -6,9 +7,9 @@ export default function RootLayout() {
       screenOptions={{
         tabBarActiveTintColor: "#e91e63",
         tabBarInactiveTintColor: "#6b7280",
-        tabBarStyle: { 
+        tabBarStyle: {
           backgroundColor: "#FFFFFF",
-          borderTopColor: "#e5e7eb" 
+          borderTopColor: "#e5e7eb"
         },
         headerStyle: {
           backgroundColor: "#ef4444",
@@ -17,17 +18,28 @@ export default function RootLayout() {
           color: "#fff",
         },
         headerTintColor: "#fff",
-      }} 
+      }}
     >
-      <Tabs.Screen 
-        name="(pokedex)" 
-        options={{ 
-            title: "Pokedex", 
-            headerShown: false,
+      <Tabs.Screen
+        name="(pokedex)"
+        options={{
+          title: "Pokedex",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="list" color={color} size={size} />
+          )
         }}
       />
-      <Tabs.Screen name="favorites" options={{ title: "Favorites" }} />
+      <Tabs.Screen 
+        name="favorites"
+        options={{
+          title: "Favorites",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="heart" color={color} size={size} />
+          )
+        }}
+      />
     </Tabs>
-    
+
   );
 }
