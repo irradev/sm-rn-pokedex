@@ -1,14 +1,17 @@
-import { fetchPokemonList } from "@/lib/pokeapi";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { fetchPokemonByName, fetchPokemonList } from "@/lib/pokeapi";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { ActivityIndicator, Button, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, Button, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const LIMIT = 30;
 
 export default function PokedexScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [pageError, setPageError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const { data, isLoading, isError, error, fetchNextPage, isFetchingNextPage, hasNextPage, refetch } = useInfiniteQuery({
     queryKey: ["pokemon-list"],
@@ -20,6 +23,37 @@ export default function PokedexScreen() {
       return Number(url.searchParams.get("offset"));
     },
   });
+
+  const pokemon = data?.pages.flatMap((page) => page.results) ?? [];
+  const isSearching = search.trim().length > 0;
+
+  const localFiltered = useMemo(() => {
+    if (!isSearching) return [];
+    const q = search.toLowerCase();
+    return pokemon.filter((p) => p.name.toLowerCase().includes(q));
+  }, [search, pokemon, isSearching]);
+
+  const hasLocalResults = localFiltered.length > 0;
+
+  const { data: directResult, isLoading: isDirectLoading, error: directError } = useQuery({
+    queryKey: ["pokemon-direct-search", search.toLowerCase()],
+    queryFn: () => fetchPokemonByName(search.toLowerCase()),
+    enabled: isSearching && !hasLocalResults,
+    retry: false,
+    staleTime: Infinity,
+  });
+
+  const directSearchItems = useMemo(() => {
+    if (!directResult) return [];
+    return [{ name: directResult.name, url: `https://pokeapi.co/api/v2/pokemon/${directResult.id}/` }];
+  }, [directResult]);
+
+  const displayPokemon = isSearching
+    ? (hasLocalResults ? localFiltered : directSearchItems)
+    : pokemon;
+
+  const isSearchLoading = isSearching && !hasLocalResults && isDirectLoading;
+  const searchErrorMessage = isSearching && !hasLocalResults ? (directError?.message ?? null) : null;
 
   if (isLoading) {
     return (
@@ -38,8 +72,6 @@ export default function PokedexScreen() {
     );
   }
 
-  const pokemon = data?.pages.flatMap((page) => page.results) ?? [];
-
   const handleLoadMore = async () => {
     setPageError(null);
     try {
@@ -50,42 +82,81 @@ export default function PokedexScreen() {
   };
 
   return (
-    <FlatList
-      data={pokemon}
-      keyExtractor={(item) => item.name}
-      contentContainerStyle={styles.list}
-      onEndReached={() => {
-        if (hasNextPage && !isFetchingNextPage) handleLoadMore();
-      }}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={
-        isFetchingNextPage ? (
-          <ActivityIndicator style={styles.footer} />
-        ) : pageError ? (
-          <View style={styles.footerError}>
-            <Text style={styles.errorText}>{pageError}</Text>
-            <Button title="Retry" onPress={handleLoadMore} />
-          </View>
-        ) : null
-      }
-      renderItem={({ item }) => {
-        const id = item.url.split("/").filter(Boolean).at(-1);
-        const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-        return (
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => router.push(`/(tabs)/(pokedex)/${id}`)}
-          >
-            <Image source={{ uri: spriteUrl }} style={{ width: 50, height: 50 }} />
-            <Text style={styles.itemText}>#{id} - {item.name}</Text>
-          </TouchableOpacity>
-        );
-      }}
-    />
+    <KeyboardAvoidingView
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 100}
+    >
+      <FlatList
+        data={displayPokemon}
+        keyExtractor={(item) => item.name}
+        contentContainerStyle={styles.list}
+        style={styles.listContainer}
+        onEndReached={() => {
+          if (!isSearching && hasNextPage && !isFetchingNextPage) handleLoadMore();
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isSearching ? null :
+            isFetchingNextPage ? (
+              <ActivityIndicator style={styles.footer} />
+            ) : pageError ? (
+              <View style={styles.footerError}>
+                <Text style={styles.errorText}>{pageError}</Text>
+                <Button title="Retry" onPress={handleLoadMore} />
+              </View>
+            ) : null
+        }
+        ListEmptyComponent={
+          isSearching ? (
+            isSearchLoading ? (
+              <View style={styles.emptyContainer}>
+                <ActivityIndicator />
+              </View>
+            ) : searchErrorMessage ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>{searchErrorMessage}</Text>
+              </View>
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No Pokemon found</Text>
+              </View>
+            )
+          ) : null
+        }
+        renderItem={({ item }) => {
+          const id = item.url.split("/").filter(Boolean).at(-1);
+          const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+          return (
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() => router.push(`/(tabs)/(pokedex)/${id}`)}
+            >
+              <Image source={{ uri: spriteUrl }} style={{ width: 50, height: 50 }} />
+              <Text style={styles.itemText}>#{id} - {item.name}</Text>
+            </TouchableOpacity>
+          );
+        }}
+      />
+      {searchErrorMessage && (
+        <View style={styles.searchError}>
+          <Text style={styles.errorText}>{searchErrorMessage}</Text>
+        </View>
+      )}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search Pokemon..."
+        value={search}
+        onChangeText={setSearch}
+      />
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   loading: {
     flex: 1,
     alignItems: "center",
@@ -101,8 +172,20 @@ const styles = StyleSheet.create({
     color: "#dc2626",
     fontSize: 16,
   },
+  emptyContainer: {
+    padding: 32,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#6b7280",
+  },
+  listContainer: {
+    flex: 1,
+  },
   list: {
     padding: 16,
+    paddingBottom: 0,
   },
   item: {
     flexDirection: "row",
@@ -123,5 +206,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     padding: 16,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    padding: 12,
+    margin: 16,
+    marginBottom: 0,
+    fontSize: 16,
+    backgroundColor: "#fff",
+  },
+  searchError: {
+    paddingHorizontal: 16,
+    paddingBottom: 4,
   },
 });

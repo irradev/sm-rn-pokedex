@@ -12,3 +12,9 @@ export async function fetchPokemonDetail(id: number): Promise<PokemonDetailRespo
   const res = await fetch(`${BASE_URL}/pokemon/${id}`);
   return res.json();
 }
+
+export async function fetchPokemonByName(name: string): Promise<PokemonDetailResponse> {
+  const res = await fetch(`${BASE_URL}/pokemon/${name}`);
+  if (!res.ok) throw new Error(`Pokemon "${name}" not found`);
+  return res.json();
+}
