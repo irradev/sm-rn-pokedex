@@ -11,6 +11,16 @@ export default function PokedexLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Pokedex" }} />
       <Stack.Screen name="[id]" options={{ title: "Pokemon Details" }} />
+      <Stack.Screen name="stats-modal" 
+        options={{ 
+          title: "Stats", 
+          presentation: "formSheet",
+          headerShown: false,
+          sheetAllowedDetents: [0.71, 1],
+          sheetGrabberVisible: false,
+          sheetCornerRadius: 24
+        }}
+      />
     </Stack>
   );
 }
