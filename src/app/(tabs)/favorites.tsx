@@ -1,9 +1,9 @@
+import PokemonMiniCard from "@/components/PokemonMiniCard";
 import { useFavorites } from "@/hooks/useFavorites";
-import { useRouter } from "expo-router";
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { router } from "expo-router";
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
 
 export default function FavoritesScreen() {
-  const router = useRouter();
   const { favorites, loaded, loadError } = useFavorites();
 
   if (!loaded) {
@@ -18,7 +18,9 @@ export default function FavoritesScreen() {
     <FlatList
       data={favorites}
       keyExtractor={(item) => String(item.id)}
-      contentContainerStyle={favorites.length === 0 ? styles.emptyList : styles.list}
+      numColumns={2}
+      contentContainerStyle={favorites.length === 0 ? styles.emptyList : styles.grid}
+      columnWrapperStyle={favorites.length === 0 ? undefined : styles.row}
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
           {loadError ? (
@@ -31,18 +33,13 @@ export default function FavoritesScreen() {
           )}
         </View>
       }
-      renderItem={({ item }) => {
-        const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`;
-        return (
-          <TouchableOpacity
-            style={styles.item}
-            onPress={() => router.push(`/(tabs)/(pokedex)/${item.id}`)}
-          >
-            <Image source={{ uri: spriteUrl }} style={styles.sprite} />
-            <Text style={styles.itemText}>#{String(item.id).padStart(4, "0")} - {item.name}</Text>
-          </TouchableOpacity>
-        );
-      }}
+      renderItem={({ item }) => (
+        <PokemonMiniCard
+          id={item.id}
+          name={item.name}
+          onPress={() => router.navigate(`/pokemon-detail-modal?id=${item.id}&isFavorite=true`)}
+        />
+      )}
     />
   );
 }
@@ -53,8 +50,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  list: {
-    padding: 16,
+  grid: {
+    padding: 8,
+  },
+  row: {
+    gap: 0,
   },
   emptyList: {
     flex: 1,
@@ -74,22 +74,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#9ca3af",
     textAlign: "center",
-  },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  sprite: {
-    width: 50,
-    height: 50,
-  },
-  itemText: {
-    fontSize: 16,
-    textTransform: "capitalize",
   },
   errorText: {
     color: "#dc2626",
