@@ -133,7 +133,10 @@ export default function PokedexScreen() {
           const favorite = isFavorite(id);
           return (
             <TouchableOpacity
-              style={styles.item}
+              style={[
+                  styles.item,
+                  favorite ? styles.itemFavorite : null,
+              ]}
               onPress={() => router.push(`/(tabs)/(pokedex)/${id}`)}
             >
               <Image source={{ uri: spriteUrl }} style={{ width: 50, height: 50 }} />
@@ -203,6 +206,14 @@ const styles = StyleSheet.create({
   itemText: {
     fontSize: 16,
     textTransform: "capitalize",
+  },
+  itemFavorite: {
+    backgroundColor: "#fef3c7",
+    borderWidth: 1,
+    borderColor: "#f59e0b",
+    borderBottomWidth: 1,
+    borderBottomColor: "#f59e0b",
+    borderRadius: 8,
   },
   footer: {
     padding: 16,
