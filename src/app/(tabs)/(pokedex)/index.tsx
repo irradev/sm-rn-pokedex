@@ -1,10 +1,10 @@
+import PokemonListItem from "@/components/PokemonListItem";
 import { useFavorites } from "@/hooks/useFavorites";
 import { fetchPokemonByName, fetchPokemonList } from "@/lib/pokeapi";
-import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Button, FlatList, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Button, FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const LIMIT = 30;
@@ -129,20 +129,13 @@ export default function PokedexScreen() {
         }
         renderItem={({ item }) => {
           const id = Number(item.url.split("/").filter(Boolean).at(-1));
-          const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-          const favorite = isFavorite(id);
           return (
-            <TouchableOpacity
-              style={[
-                  styles.item,
-                  favorite ? styles.itemFavorite : null,
-              ]}
+            <PokemonListItem
+              id={id}
+              name={item.name}
+              favorite={isFavorite(id)}
               onPress={() => router.push(`/(tabs)/(pokedex)/${id}`)}
-            >
-              <Image source={{ uri: spriteUrl }} style={{ width: 50, height: 50 }} />
-              <Text style={styles.itemText}>#{id} - {item.name}</Text>
-              {favorite && <Ionicons name="star" size={18} color="#f59e0b" />}
-            </TouchableOpacity>
+            />
           );
         }}
       />
@@ -195,26 +188,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 0,
   },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
-  },
-  itemText: {
-    fontSize: 16,
-    textTransform: "capitalize",
-  },
-  itemFavorite: {
-    backgroundColor: "#fef3c7",
-    borderWidth: 1,
-    borderColor: "#f59e0b",
-    borderBottomWidth: 1,
-    borderBottomColor: "#f59e0b",
-    borderRadius: 8,
-  },
+
   footer: {
     padding: 16,
   },
