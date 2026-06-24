@@ -1,56 +1,31 @@
-# Welcome to your Expo app 👋
+# Pokedex
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A feature-rich Pokedex app built with React Native (Expo) to practice mobile development and explore the [OpenCode](https://opencode.ai) AI coding assistant.
 
-## Get started
+## What I learned
 
-1. Install dependencies
+- **React Native & Expo** — Navigation with expo-router, stack & tab layouts, transparent modals, file-based routing
+- **React Query** — Infinite queries for paginated lists, data fetching patterns
+- **Reanimated** — Enter animations (`FadeIn`, `FadeInDown`, `ZoomIn`), layout transitions (`LinearTransition`), parallax scroll effects, skeleton pulsing
+- **Context API** — Sharing state across screens via `FavoritesContext` with AsyncStorage persistence
+- **OpenCode** — Using AI pair-programming to iterate quickly, refactor safely, and explore the codebase with natural language prompts
+- **PokeAPI** — Consuming a REST API with typed responses
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+- Infinite-scroll pokedex (30 per page) with local search + API fallback
+- Favorites with persistent storage, shared state across tabs
+- Detail view with collapsible advanced stats, type colors, stat bars
+- Centered transparent modal for quick pokemon lookup
+- Skeleton loading states, staggered entry animations, parallax header
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Setup
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Stack
 
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Expo, expo-router, react-native-reanimated, @tanstack/react-query, AsyncStorage, PokeAPI
