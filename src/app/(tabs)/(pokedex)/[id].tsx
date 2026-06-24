@@ -1,15 +1,16 @@
 import { STAT_LABELS } from "@/constants/pokemon";
+import { useFavorites } from "@/hooks/useFavorites";
 import { fetchPokemonDetail } from "@/lib/pokeapi";
 import { TYPE_COLORS } from "@/themes/colors";
+import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator, Button, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-
-
 export default function PokemonDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["pokemon", id],
@@ -35,11 +36,25 @@ export default function PokemonDetailsScreen() {
 
   const types = data.types.map((t) => t.type.name);
   const primaryColor = TYPE_COLORS[types[0]] ?? "#999";
+  const favorite = isFavorite(data.id);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container} contentContainerStyle={styles.content}>
       <View>
         <View style={[styles.imageWrapper, { backgroundColor: primaryColor + "90" }]}>
+          <View style={styles.topRow}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }} >
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={28} color="#fff" />
+              </TouchableOpacity>
+              <Text style={styles.id}>#{String(data.id).padStart(4, "0")}</Text>
+            </View>
+
+            <TouchableOpacity onPress={() => toggleFavorite({ id: data.id, name: data.name })}>
+              <Ionicons name={favorite ? "heart" : "heart-outline"} size={28} color="#fff" />
+            </TouchableOpacity>
+          </View>
+
           <Text style={styles.name}>{data.name}</Text>
           <Image
             source={{ uri: data.sprites.other["official-artwork"].front_default ?? undefined }}
@@ -47,7 +62,6 @@ export default function PokemonDetailsScreen() {
           />
         </View>
 
-        <Text style={styles.id}>#{String(data.id).padStart(4, "0")}</Text>
 
         <View style={styles.infoRow}>
           <InfoCard label="Height" value={`${data.height / 10} m`} />
@@ -139,11 +153,20 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 10,
-    textAlign: "right",
-    position: "absolute",
-    top: 20,
-    right: 20,
-    width: '30%'
+    // textAlign: "right",
+    // position: "absolute",
+    // top: 20,
+    // right: 20,
+    // width: '30%'
+  },
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    // marginBottom: 8,
+    width: "100%",
+    // backgroundColor: "#ef4444",
+    paddingHorizontal: 16,
   },
   name: {
     fontSize: 28,
@@ -154,13 +177,6 @@ const styles = StyleSheet.create({
     textShadowColor: "#000",
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 10,
-    // backgroundColor: "black",
-    // padding: 8,
-    marginBottom: 8,
-    width: "70%",
-    alignSelf: "center",
-
-
   },
   typesRow: {
     flexDirection: "row",
@@ -189,7 +205,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     position: 'absolute',
     bottom: -28,
-    width:'80%',
+    width: '80%',
   },
   abilityText: {
     alignItems: "center",
@@ -199,7 +215,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
     backgroundColor: "#f5f5f5",
-    textTransform: "capitalize", 
+    textTransform: "capitalize",
   },
   infoCard: {
     flex: 1,

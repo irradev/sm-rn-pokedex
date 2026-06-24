@@ -10,7 +10,7 @@ export default function PokedexLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Pokedex" }} />
-      <Stack.Screen name="[id]" options={{ title: "Pokemon Details" }} />
+      <Stack.Screen name="[id]" options={{ title: "Pokemon Details", headerShown: false }} />
       <Stack.Screen name="stats-modal" 
         options={{ 
           title: "Stats", 

@@ -1,4 +1,6 @@
+import { useFavorites } from "@/hooks/useFavorites";
 import { fetchPokemonByName, fetchPokemonList } from "@/lib/pokeapi";
+import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
@@ -10,6 +12,7 @@ const LIMIT = 30;
 export default function PokedexScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isFavorite } = useFavorites();
   const [pageError, setPageError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -125,8 +128,9 @@ export default function PokedexScreen() {
           ) : null
         }
         renderItem={({ item }) => {
-          const id = item.url.split("/").filter(Boolean).at(-1);
+          const id = Number(item.url.split("/").filter(Boolean).at(-1));
           const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+          const favorite = isFavorite(id);
           return (
             <TouchableOpacity
               style={styles.item}
@@ -134,6 +138,7 @@ export default function PokedexScreen() {
             >
               <Image source={{ uri: spriteUrl }} style={{ width: 50, height: 50 }} />
               <Text style={styles.itemText}>#{id} - {item.name}</Text>
+              {favorite && <Ionicons name="star" size={18} color="#f59e0b" />}
             </TouchableOpacity>
           );
         }}
